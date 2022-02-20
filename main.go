@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"os"
 )
 
 func main() {
@@ -25,12 +26,11 @@ func main() {
 	//Telegram connection
 	botToken := viper.GetString("botSettings.token")
 	bot, err := tgbotapi.NewBotAPI(botToken)
-	if err != nil{
+	if err != nil {
 		logrus.Fatal("Error with bot authorization:", err.Error())
 	}
 	fmt.Printf("Successfully authorized on [ %s ]\n", bot.Self.UserName)
-	//bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID))
-
+	//hotfix here!
 }
 
 func initConfig() error {
