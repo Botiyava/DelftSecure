@@ -1,3 +1,0 @@
-# DelftSecure
-
-In progress...
