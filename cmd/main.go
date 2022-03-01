@@ -14,9 +14,17 @@ import (
 	"time"
 )
 
-var db *sqlx.DB
+var (
+	delete = &tele.ReplyMarkup{}
+	btnDelete = delete.Data("If you copied password, press this button", "delete")
+	db *sqlx.DB
+
+)
+//TODO убрать костыль
+var secret = ""
 
 func main() {
+
 	// Logging system
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
@@ -47,22 +55,34 @@ func main() {
 
 	// Database connection
 	db, err = repository.NewPostgresDB(repository.Config{
+		Host: viper.GetString("db.host"),
+		Port: viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 		Password: viper.GetString("db.password"),
 	})
+	secret = viper.GetString("secret.key")
+
+
 	if err != nil {
 		logrus.Fatalf("Failed to initialize db: %s", err.Error())
 	}
 	fmt.Println("Successfully connected to [ database ].")
+
+
 	fmt.Println("Now bot is working...")
 	defer db.Close()
+	delete.Inline(
+		delete.Row(btnDelete),
+	)
 
 	b.Handle("/start", startHandler)
 	b.Handle("/help", startHandler)
 	b.Handle("/new", newHandler, middleware.ValidationNew)
 	b.Handle("/get", getHandler, middleware.ValidationGet)
+	b.Handle(&btnDelete, deleteMessageWithPassword)
+
 
 	b.Start()
 
@@ -70,7 +90,7 @@ func main() {
 
 func initConfig() error {
 	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
+	viper.SetConfigName("config1")
 	return viper.ReadInConfig()
 }
 
@@ -116,9 +136,8 @@ func newHandler(c tele.Context) error {
 		}
 		c.Send("Successfully updated password to user " + userLogin + " on " + userURL)
 	} else {
-		fmt.Printf("%v, %s, %s, %s\n", c.Sender().ID, userURL, userLogin, userPassword)
-		_, err = db.Exec("INSERT INTO password_storage(userid, url, login, password) VALUES ($1,$2,$3,$4)",
-			userID, userURL, userLogin, userPassword)
+		_, err = db.Exec("INSERT INTO password_storage(userid, url, login, password) VALUES ($1,$2,$3,pgp_sym_encrypt($4, $5))",
+			userID, userURL, userLogin, userPassword, secret)
 		if err != nil {
 			logrus.Fatalf("newHandler: Failed to add new record in db: %s", err.Error())
 			c.Send("Sorry, I can't add your record\nnPlease try again later.")
@@ -136,13 +155,17 @@ func getHandler(c tele.Context) error{
 	userLogin := tags[1]
 
 	var password string
-	err := db.QueryRow("SELECT password FROM password_storage WHERE userid = $1 AND url = $2 AND login = $3",
-		userID, userURL, userLogin).Scan(&password)
+	err := db.QueryRow("SELECT pgp_sym_decrypt(password::bytea, $1) FROM password_storage WHERE userid = $2 AND url = $3 AND login = $4",
+		secret, userID, userURL, userLogin).Scan(&password)
 	if err != nil{
 		fmt.Println(err)
 	}
-	fmt.Println(password)
-	c.Send("Login: " + userLogin + " Password: " + password)
-	c.DeleteAfter(10 * time.Second)
+
+		c.Send("Login: " + userLogin + " Password: " + password, delete)
+
 return nil
+}
+
+func deleteMessageWithPassword(c tele.Context) error{
+	return c.Delete()
 }

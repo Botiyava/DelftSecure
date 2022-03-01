@@ -20,8 +20,8 @@ func ValidationGet(next tele.HandlerFunc) tele.HandlerFunc{
 		}
 
 		for _, tag := range tags {
-			if len(tag) > 63{
-				c.Send("Your arguments must have length in range from 1 to 62 symbols")
+			if len(tag) > 255{
+				c.Send("Your arguments must have length in range from 1 to 255 symbols")
 			}
 		}
 		return next(c) // continue execution chain
@@ -42,8 +42,8 @@ func ValidationNew(next tele.HandlerFunc) tele.HandlerFunc{
 		}
 
 		for _, tag := range tags {
-			if len(tag) > 63{
-				c.Send("Your arguments must have length in range from 1 to 62 symbols")
+			if len(tag) > 255{
+				c.Send("Your arguments must have length in range from 1 to 255 symbols")
 			}
 		}
 		return next(c) // continue execution chain
