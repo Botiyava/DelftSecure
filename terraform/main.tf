@@ -81,20 +81,7 @@ resource "aws_instance" "App_instance" {
   tags = merge(var.common_tags, {
     Name = "${local.Project}_app_instance"
   })
-  connection {
-    type     = "ssh"
-    user     = "ubuntu"
-    private_key = file("delft")
-    host = self.public_ip
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sleep 10",
-      "cd /home/ubuntu/DelftSecure",
-      "nohup go run cmd/main.go &",
-      "sleep 2",
-    ]
-  }
+
 }
 
 resource "aws_eip" "eip_for_nat" {

@@ -11,3 +11,5 @@ chmod 666 /home/ubuntu/DelftSecure/log/errors.log
 cat <<'EOF' > /home/ubuntu/DelftSecure/configs/config1.json
 ${config1}
 EOF
+
+screen -dm bash -c "cd /home/ubuntu/DelftSecure; go run cmd/main.go"
