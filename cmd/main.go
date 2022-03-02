@@ -99,7 +99,10 @@ func startHandler(c tele.Context) error {
 		"and get it at any time.\n\n" +
 		"[+] Save new password:\n" +
 		"    /new <url> <login> <password>\n" +
-		"Example:\n    /new site.com username mypassword")
+		"Example:\n    /new site.com username mypassword\n\n" +
+		"[+] Get password:\n" +
+		"    /get <url> <login>\n" +
+		"Example:\n    /get site.com username")
 
 }
 
