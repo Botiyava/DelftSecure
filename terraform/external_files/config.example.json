@@ -1,0 +1,16 @@
+  {
+  "botSettings": {
+    "token": "Your_awesome_tg_bot_token"
+  },
+  "db": {
+    "username": "postgres",
+    "dbname": "postgres",
+    "sslmode": "disable",
+    "host": "172.31.20.100",
+    "port": "5432",
+    "password": "yourG_awesome_password_for_db_user"
+  },
+  "secret": {
+    "key": "your_awesome_key_for_db_encryption"
+  }
+}
